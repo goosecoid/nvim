@@ -43,6 +43,8 @@ P.S. You can delete this when you're done too. It's your config now :)
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+vim.g.nvlime_config = { cmp = { enabled = true } }
+vim.g['conjure#extract#tree_sitter#enabled'] = true
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
@@ -217,6 +219,53 @@ require('lazy').setup({
     build = ':TSUpdate',
   },
 
+  {
+    -- Conjure Interactive Eval Client
+    "Olical/conjure",
+    ft = { "clojure", "fennel", "python" },
+    -- [Optional] cmp-conjure for cmp
+    dependencies = {
+        {
+            "PaterJason/cmp-conjure",
+            config = function()
+                local cmp = require("cmp")
+                local config = cmp.get_config()
+                table.insert(config.sources, {
+                    name = "buffer",
+                    option = {
+                        sources = {
+                            { name = "conjure" },
+                        },
+                    },
+                })
+                cmp.setup(config)
+            end,
+        },
+    },
+    config = function(_, opts)
+        require("conjure.main").main()
+        require("conjure.mapping")["on-filetype"]()
+    end,
+    init = function()
+	       -- Set configuration options here
+        vim.g["conjure#debug"] = true
+    end,
+},
+
+{
+  -- Vlime common lisp
+  'monkoose/nvlime',
+  dependencies = {
+    'monkoose/parsley',
+  },
+
+},
+
+{
+ 'gpanders/nvim-parinfer',
+
+},
+
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
@@ -241,6 +290,7 @@ vim.o.hlsearch = false
 
 -- Make line numbers default
 vim.wo.number = true
+vim.wo.relativenumber = true
 
 -- Enable mouse mode
 vim.o.mouse = 'a'
@@ -289,6 +339,7 @@ vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnos
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
 
+
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
 local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
@@ -299,6 +350,8 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = highlight_group,
   pattern = '*',
 })
+
+
 
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
@@ -378,7 +431,7 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'commonlisp' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -596,6 +649,7 @@ cmp.setup {
   sources = {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
+    { name = 'nvlime' },
   },
 }
 
