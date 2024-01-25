@@ -114,7 +114,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  { 'folke/which-key.nvim',  opts = {} },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -223,51 +223,51 @@ require('lazy').setup({
   {
     -- Conjure Interactive Eval Client
     "Olical/conjure",
-    ft = { "clojure", "fennel", "python" },
+    ft = { "clojure", "fennel", "python", "janet" },
     -- [Optional] cmp-conjure for cmp
     dependencies = {
-        {
-            "PaterJason/cmp-conjure",
-            config = function()
-                local cmp = require("cmp")
-                local config = cmp.get_config()
-                table.insert(config.sources, {
-                    name = "buffer",
-                    option = {
-                        sources = {
-                            { name = "conjure" },
-                        },
-                    },
-                })
-                cmp.setup(config)
-            end,
-        },
+      {
+        "PaterJason/cmp-conjure",
+        config = function()
+          local cmp = require("cmp")
+          local config = cmp.get_config()
+          table.insert(config.sources, {
+            name = "buffer",
+            option = {
+              sources = {
+                { name = "conjure" },
+              },
+            },
+          })
+          cmp.setup(config)
+        end,
+      },
     },
     config = function(_, opts)
-        require("conjure.main").main()
-        require("conjure.mapping")["on-filetype"]()
+      require("conjure.main").main()
+      require("conjure.mapping")["on-filetype"]()
     end,
     init = function()
-	       -- Set configuration options here
-        vim.g["conjure#debug"] = true
+      -- Set configuration options here
+      vim.g["conjure#debug"] = true
     end,
-},
-
-{
-  -- Vlime common lisp
-  'monkoose/nvlime',
-  dependencies = {
-    'monkoose/parsley',
   },
 
-},
+  {
+    -- Vlime common lisp
+    'monkoose/nvlime',
+    dependencies = {
+      'monkoose/parsley',
+    },
 
-{
- 'gpanders/nvim-parinfer',
+  },
 
-},
+  {
+    'gpanders/nvim-parinfer',
 
-{
+  },
+
+  {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v3.x",
     dependencies = {
@@ -276,8 +276,11 @@ require('lazy').setup({
       "MunifTanjim/nui.nvim",
       -- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
     }
-}
+  },
 
+  {
+    "nvimtools/none-ls.nvim"
+  },
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
@@ -292,6 +295,52 @@ require('lazy').setup({
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   -- { import = 'custom.plugins' },
 }, {})
+
+-- Null ls setup
+
+local null_ls = require("null-ls");
+local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+null_ls.setup({
+  sources = {
+    null_ls.builtins.formatting.prettier.with({
+      filetypes = {
+        "javascript",
+        "typescript",
+        "css",
+        "scss",
+        "html",
+        "json",
+        "yaml",
+        "markdown",
+        "graphql",
+        "md",
+        "txt",
+      },
+      only_local = "node_modules/.bin",
+    }),
+    null_ls.builtins.diagnostics.stylelint.with({
+      filetypes = {
+        "css",
+        "scss",
+      },
+    }),
+  },
+  on_attach = function(client, bufnr)
+    if client.supports_method("textDocument/formatting") then
+      vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        group = augroup,
+        buffer = bufnr,
+        callback = function()
+          -- on 0.8, you should use vim.lsp.buf.format({ bufnr = bufnr }) instead
+          -- vim.lsp.buf.formatting_sync()
+          vim.lsp.buf.format({ bufnr = bufnr})
+        end,
+      })
+    end
+  end,
+});
+
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -410,7 +459,7 @@ local function live_grep_git_root()
   local git_root = find_git_root()
   if git_root then
     require('telescope.builtin').live_grep({
-      search_dirs = {git_root},
+      search_dirs = { git_root },
     })
   end
 end
@@ -443,7 +492,7 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'commonlisp', 'html', 'templ' },
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'commonlisp', 'html', 'templ', 'proto', 'janet_simple' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -576,7 +625,7 @@ require('mason-lspconfig').setup()
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
-  -- clangd = {},
+  clangd = {},
   templ = {},
   gopls = {},
   -- pyright = {},
