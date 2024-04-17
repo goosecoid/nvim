@@ -37,6 +37,10 @@ I hope you enjoy your Neovim journey,
 
 P.S. You can delete this when you're done too. It's your config now :)
 --]]
+vim.o.tabstop = 4      -- A TAB character looks like 4 spaces
+vim.o.expandtab = true -- Pressing the TAB key will insert spaces instead of a TAB character
+vim.o.softtabstop = 4  -- Number of spaces inserted instead of a TAB character
+vim.o.shiftwidth = 4   -- Number of spaces inserted when indenting
 
 -- Set <space> as the leader key
 -- See `:help mapleader`
@@ -223,7 +227,7 @@ require('lazy').setup({
   {
     -- Conjure Interactive Eval Client
     "Olical/conjure",
-    ft = { "clojure", "fennel", "python", "janet" },
+    ft = { "clojure", "fennel" },
     -- [Optional] cmp-conjure for cmp
     dependencies = {
       {
@@ -281,6 +285,10 @@ require('lazy').setup({
   {
     "nvimtools/none-ls.nvim"
   },
+
+  -- {
+  --   "github/copilot.vim"
+  -- },
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
@@ -334,7 +342,7 @@ null_ls.setup({
         callback = function()
           -- on 0.8, you should use vim.lsp.buf.format({ bufnr = bufnr }) instead
           -- vim.lsp.buf.formatting_sync()
-          vim.lsp.buf.format({ bufnr = bufnr})
+          vim.lsp.buf.format({ bufnr = bufnr })
         end,
       })
     end
@@ -492,7 +500,7 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'commonlisp', 'html', 'templ', 'proto', 'janet_simple' },
+    ensure_installed = { 'go', 'lua', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'commonlisp', 'html', 'templ', 'proto' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -625,7 +633,8 @@ require('mason-lspconfig').setup()
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
-  clangd = {},
+  clangd = { filetypes = { 'c', 'cpp', 'objcpp', 'cuda' } },
+  bufls = {},
   templ = {},
   gopls = {},
   -- pyright = {},
